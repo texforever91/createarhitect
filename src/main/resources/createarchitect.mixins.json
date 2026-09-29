@@ -7,8 +7,11 @@
     "SchematicannonBlockEntityMixin",
     "SchematicannonInventoryMixin",
     "client.MouseHandlerMixin",
+    "client.SchematicannonScreenMixin",
     "client.SchematicHandlerMixin",
-    "client.SchematicToolBaseMixin"
+    "client.SchematicToolBaseMixin",
+    "client.accessor.AbstractContainerScreenAccessor",
+    "client.accessor.ScreenInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

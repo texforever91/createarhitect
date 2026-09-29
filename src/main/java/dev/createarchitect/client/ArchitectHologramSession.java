@@ -36,6 +36,9 @@ public final class ArchitectHologramSession {
     private static final KeyMapping EDIT = new KeyMapping(
             "key.createarchitect.edit_hologram", InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_G, "key.categories.createarchitect");
+    private static final KeyMapping EXIT_FREECAM = new KeyMapping(
+            "key.createarchitect.exit_freecam", InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_V, "key.categories.createarchitect");
     private static final double MAX_DISCOVERY_DISTANCE_SQR = 192 * 192;
     private static final double CAMERA_SPEED = 0.55;
     private static final double CAMERA_FAST_SPEED = 1.65;
@@ -72,6 +75,23 @@ public final class ArchitectHologramSession {
         return true;
     }
 
+    public static void openFreecam(SchematicannonBlockEntity cannon) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null || minecraft.level == null)
+            return;
+        if (cannon.state != SchematicannonBlockEntity.State.STOPPED) {
+            message(minecraft, "message.createarchitect.cannon_running");
+            return;
+        }
+        if (!select(cannon)) {
+            message(minecraft, "message.createarchitect.no_schematic");
+            return;
+        }
+        minecraft.player.closeContainer();
+        startCamera(minecraft);
+        message(minecraft, "message.createarchitect.freecam_started");
+    }
+
     public static void sync(SchematicTransformation transformation) {
         if (!editing || cannonPos == null)
             return;
@@ -88,10 +108,17 @@ public final class ArchitectHologramSession {
         while (EDIT.consumeClick())
             toggleEditing(minecraft);
 
-        if (editing)
+        while (EXIT_FREECAM.consumeClick()) {
+            if (camera != null) {
+                stopCamera(minecraft);
+                message(minecraft, "message.createarchitect.freecam_stopped");
+            }
+        }
+
+        if (camera != null)
             tickCamera(minecraft);
 
-        if (!editing && --scanCooldown <= 0) {
+        if (!editing && camera == null && --scanCooldown <= 0) {
             discoverNearest(minecraft.level, minecraft.player.blockPosition());
             scanCooldown = 20;
         }
@@ -100,7 +127,6 @@ public final class ArchitectHologramSession {
     private static void toggleEditing(Minecraft minecraft) {
         if (editing) {
             editing = false;
-            stopCamera(minecraft);
             message(minecraft, "message.createarchitect.editing_stopped");
             return;
         }
@@ -122,7 +148,6 @@ public final class ArchitectHologramSession {
             return;
         }
         editing = true;
-        startCamera(minecraft);
         message(minecraft, "message.createarchitect.editing_started");
     }
 
@@ -142,9 +167,9 @@ public final class ArchitectHologramSession {
     private static void tickCamera(Minecraft minecraft) {
         if (camera == null || minecraft.getCameraEntity() != camera) {
             stopCamera(minecraft);
-            editing = false;
             return;
         }
+        camera.setOldPosAndRot();
         if (minecraft.screen != null)
             return;
 
@@ -162,7 +187,6 @@ public final class ArchitectHologramSession {
         if (movement.lengthSqr() == 0)
             return;
 
-        camera.setOldPosAndRot();
         double speed = minecraft.options.keySprint.isDown() ? CAMERA_FAST_SPEED : CAMERA_SPEED;
         Vec3 next = camera.position().add(movement.normalize().scale(speed));
         if (cannonPos != null) {
@@ -252,6 +276,7 @@ public final class ArchitectHologramSession {
         @SubscribeEvent
         public static void registerKeys(RegisterKeyMappingsEvent event) {
             event.register(EDIT);
+            event.register(EXIT_FREECAM);
         }
     }
 

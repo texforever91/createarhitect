@@ -38,11 +38,11 @@ The current alpha provides the first persistent-schematic workflow:
   even when the player is no longer holding the schematic item.
 - The preview reuses Create's native schematic renderer and visual style.
 - Create's schematic boundary remains visible around the planned structure.
-- Looking at the Schematicannon and pressing `G` enters Architect Mode.
+- Pressing `G` enters Architect Mode for the selected Schematicannon.
 - Create's normal schematic toolbar can move, rotate, and mirror the schematic
   stored inside the cannon.
-- Architect Mode provides a detached free camera so large builds can be viewed
-  and adjusted without physically moving the player.
+- A button in the Schematicannon screen opens a detached free camera so large
+  builds can be viewed without physically moving the player.
 - Placement changes are validated by the server and written back to the
   schematic held by the stopped cannon.
 - Leaving Architect Mode returns the camera to the player and removes the
@@ -51,8 +51,8 @@ The current alpha provides the first persistent-schematic workflow:
 ## Architect Mode controls
 
 First deploy a normal Create schematic, place it into a Schematicannon, and
-leave the cannon stopped. Look at the cannon and press `G` to enter Architect
-Mode.
+leave the cannon stopped. Press `G` to toggle its editing controls. Open the
+Schematicannon screen and use its freecam button to detach the camera.
 
 | Control | Action |
 | --- | --- |
@@ -62,6 +62,7 @@ Mode.
 | `Space` | Move the camera upward |
 | `Shift` | Move the camera downward |
 | `Ctrl` | Increase camera speed |
+| `V` | Leave freecam and return to the player |
 | Create schematic toolbar controls | Move, rotate, or mirror the schematic |
 
 The free camera is currently limited to 192 blocks from the selected cannon.
