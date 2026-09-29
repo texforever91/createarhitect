@@ -2,15 +2,20 @@ package dev.createarchitect.mixin.client;
 
 import com.simibubi.create.content.schematics.client.SchematicHandler;
 import com.simibubi.create.content.schematics.client.SchematicTransformation;
+import com.simibubi.create.content.schematics.client.tools.ISchematicTool;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.createarchitect.client.ArchitectHologramSession;
+import net.createmod.catnip.render.SuperRenderTypeBuffer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -65,5 +70,25 @@ abstract class SchematicHandlerMixin {
     private void createarchitect$hidePassiveOverlay(GuiGraphics graphics, DeltaTracker tracker, CallbackInfo ci) {
         if (activeHotbarSlot == -1 && !ArchitectHologramSession.isEditing())
             ci.cancel();
+    }
+
+    @Redirect(method = "render",
+            at = @At(value = "INVOKE",
+                    target = "Lcom/simibubi/create/content/schematics/client/tools/ISchematicTool;renderTool(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/createmod/catnip/render/SuperRenderTypeBuffer;Lnet/minecraft/world/phys/Vec3;)V"),
+            remap = false)
+    private void createarchitect$hidePassiveWorldTool(ISchematicTool tool, PoseStack poseStack,
+                                                       SuperRenderTypeBuffer buffer, Vec3 camera) {
+        if (activeHotbarSlot != -1 || ArchitectHologramSession.isEditing())
+            tool.renderTool(poseStack, buffer, camera);
+    }
+
+    @Redirect(method = "render",
+            at = @At(value = "INVOKE",
+                    target = "Lcom/simibubi/create/content/schematics/client/tools/ISchematicTool;renderOnSchematic(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/createmod/catnip/render/SuperRenderTypeBuffer;)V"),
+            remap = false)
+    private void createarchitect$hidePassiveSchematicTool(ISchematicTool tool, PoseStack poseStack,
+                                                           SuperRenderTypeBuffer buffer) {
+        if (activeHotbarSlot != -1 || ArchitectHologramSession.isEditing())
+            tool.renderOnSchematic(poseStack, buffer);
     }
 }
