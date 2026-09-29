@@ -78,7 +78,7 @@ abstract class SchematicHandlerMixin {
             remap = false)
     private void createarchitect$hidePassiveWorldTool(ISchematicTool tool, PoseStack poseStack,
                                                        SuperRenderTypeBuffer buffer, Vec3 camera) {
-        if (activeHotbarSlot != -1 || ArchitectHologramSession.isEditing())
+        if (activeHotbarSlot != -1)
             tool.renderTool(poseStack, buffer, camera);
     }
 
@@ -88,7 +88,7 @@ abstract class SchematicHandlerMixin {
             remap = false)
     private void createarchitect$hidePassiveSchematicTool(ISchematicTool tool, PoseStack poseStack,
                                                            SuperRenderTypeBuffer buffer) {
-        if (activeHotbarSlot != -1 || ArchitectHologramSession.isEditing())
+        if (activeHotbarSlot != -1)
             tool.renderOnSchematic(poseStack, buffer);
     }
 }
