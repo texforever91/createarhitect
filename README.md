@@ -19,6 +19,9 @@ With a deployed schematic in a stopped Schematicannon, its hologram remains
 visible through Create's native schematic handler. Look at the cannon and press
 `G` to enter or leave Architect Mode; while editing, Create's normal schematic
 tool-menu controls move, rotate, and mirror the cannon's stored schematic.
+Architect Mode detaches the camera without moving the player: fly with `WASD`,
+use `Space`/`Shift` for vertical movement, and hold `Ctrl` to move faster. Press
+`G` again to return immediately to the player's view.
 
 See [CREATE_RESEARCH.md](CREATE_RESEARCH.md) for the upstream architecture audit,
 implementation rationale, verification status, and known limitations.

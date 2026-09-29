@@ -6,7 +6,9 @@
   "mixins": [
     "SchematicannonBlockEntityMixin",
     "SchematicannonInventoryMixin",
-    "client.SchematicHandlerMixin"
+    "client.MouseHandlerMixin",
+    "client.SchematicHandlerMixin",
+    "client.SchematicToolBaseMixin"
   ],
   "injectors": {
     "defaultRequire": 1
