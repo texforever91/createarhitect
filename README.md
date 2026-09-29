@@ -43,6 +43,8 @@ The current alpha provides the first persistent-schematic workflow:
   stored inside the cannon.
 - A button in the Schematicannon screen opens a detached free camera so large
   builds can be viewed without physically moving the player.
+- Entering freecam from a stopped cannon also opens Create's schematic editing
+  toolbar; `G` can independently hide or restore those controls.
 - Placement changes are validated by the server and written back to the
   schematic held by the stopped cannon.
 - Leaving Architect Mode returns the camera to the player and removes the
@@ -54,6 +56,7 @@ First deploy a normal Create schematic and place it into a Schematicannon. Open
 the Schematicannon screen and use its freecam button to detach the camera; this
 also works while the cannon is running. Stop the cannon before pressing `G` to
 toggle editing controls, since an active print cannot safely be repositioned.
+Opening freecam on an already stopped cannon enables those controls immediately.
 
 | Control | Action |
 | --- | --- |

@@ -29,6 +29,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -84,6 +85,7 @@ public final class ArchitectHologramSession {
             return;
         }
         minecraft.player.closeContainer();
+        editing = cannon.state == SchematicannonBlockEntity.State.STOPPED;
         startCamera(minecraft);
         message(minecraft, "message.createarchitect.freecam_started");
     }
@@ -305,6 +307,19 @@ public final class ArchitectHologramSession {
             input.right = false;
             input.jumping = false;
             input.shiftKeyDown = false;
+        }
+
+        @SubscribeEvent
+        public static void renderFreecamHint(RenderGuiEvent.Post event) {
+            Minecraft minecraft = Minecraft.getInstance();
+            if (camera == null || minecraft.screen != null)
+                return;
+            Component hint = Component.translatable("gui.createarchitect.exit_freecam_hint");
+            int centerX = event.getGuiGraphics().guiWidth() / 2;
+            int textWidth = minecraft.font.width(hint);
+            event.getGuiGraphics().fill(centerX - textWidth / 2 - 5, 6,
+                    centerX + textWidth / 2 + 5, 20, 0x90000000);
+            event.getGuiGraphics().drawCenteredString(minecraft.font, hint, centerX, 9, 0xFFFFFF);
         }
 
         @SubscribeEvent

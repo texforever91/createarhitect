@@ -4,6 +4,7 @@
   "key.createarchitect.edit_hologram": "Edit Schematicannon Hologram",
   "key.createarchitect.exit_freecam": "Exit Architect Freecam",
   "gui.createarchitect.open_freecam": "Open Architect Freecam",
+  "gui.createarchitect.exit_freecam_hint": "Architect Freecam — Press V to exit",
   "message.createarchitect.editing_started": "Architect Mode: editing hologram",
   "message.createarchitect.editing_stopped": "Architect Mode: hologram locked",
   "message.createarchitect.freecam_started": "Architect Freecam: WASD/Space/Shift, Ctrl to boost, V to exit",
