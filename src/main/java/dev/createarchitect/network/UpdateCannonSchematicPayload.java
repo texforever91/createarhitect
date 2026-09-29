@@ -5,6 +5,7 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.content.schematics.SchematicInstances;
 import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
 import dev.createarchitect.CreateArchitect;
+import dev.createarchitect.mixin.SchematicannonBlockEntityAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -46,8 +47,6 @@ public record UpdateCannonSchematicPayload(BlockPos cannonPos, BlockPos anchor,
             return;
         if (!(player.level().getBlockEntity(payload.cannonPos) instanceof SchematicannonBlockEntity cannon))
             return;
-        if (cannon.state != SchematicannonBlockEntity.State.STOPPED)
-            return;
         if (!payload.anchor.closerThan(payload.cannonPos, SchematicannonBlockEntity.MAX_ANCHOR_DISTANCE))
             return;
 
@@ -56,6 +55,10 @@ public record UpdateCannonSchematicPayload(BlockPos cannonPos, BlockPos anchor,
                 || !schematic.getOrDefault(AllDataComponents.SCHEMATIC_DEPLOYED, false))
             return;
 
+        if (cannon.state != SchematicannonBlockEntity.State.STOPPED) {
+            cannon.state = SchematicannonBlockEntity.State.STOPPED;
+            ((SchematicannonBlockEntityAccessor) cannon).createarchitect$resetPrinter();
+        }
         schematic.set(AllDataComponents.SCHEMATIC_ANCHOR, payload.anchor);
         schematic.set(AllDataComponents.SCHEMATIC_ROTATION, payload.rotation);
         schematic.set(AllDataComponents.SCHEMATIC_MIRROR, payload.mirror);

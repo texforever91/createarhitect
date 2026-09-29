@@ -44,7 +44,7 @@ The current alpha provides the first persistent-schematic workflow:
 - A button in the Schematicannon screen opens a detached free camera so large
   builds can be viewed without physically moving the player.
 - Entering freecam from a stopped cannon also opens Create's schematic editing
-  toolbar; `G` can independently hide or restore those controls.
+  toolbar; the configured edit key can independently hide or restore them.
 - Placement changes are validated by the server and written back to the
   schematic held by the stopped cannon.
 - Leaving Architect Mode returns the camera to the player and removes the
@@ -54,19 +54,19 @@ The current alpha provides the first persistent-schematic workflow:
 
 First deploy a normal Create schematic and place it into a Schematicannon. Open
 the Schematicannon screen and use its freecam button to detach the camera; this
-also works while the cannon is running. Stop the cannon before pressing `G` to
-toggle editing controls, since an active print cannot safely be repositioned.
-Opening freecam on an already stopped cannon enables those controls immediately.
+also works while the cannon is running. Freecam enables the editing controls
+immediately. Applying the first transform to an active cannon safely stops and
+resets its printer plan before updating the schematic placement.
 
 | Control | Action |
 | --- | --- |
-| `G` | Enter or leave Architect Mode |
+| `G` (configurable) | Enable or disable schematic editing |
 | Mouse | Look around in freecam |
 | `W`, `A`, `S`, `D` | Move the free camera |
 | `Space` | Move the camera upward |
 | `Shift` | Move the camera downward |
 | `Ctrl` | Increase camera speed |
-| `V` | Leave freecam and return to the player |
+| `V` (configurable) | Leave freecam and return to the player |
 | Create schematic toolbar controls | Move, rotate, or mirror the schematic |
 
 The free camera is currently limited to 192 blocks from the selected cannon.

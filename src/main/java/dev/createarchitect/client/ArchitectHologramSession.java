@@ -85,9 +85,10 @@ public final class ArchitectHologramSession {
             return;
         }
         minecraft.player.closeContainer();
-        editing = cannon.state == SchematicannonBlockEntity.State.STOPPED;
+        editing = true;
         startCamera(minecraft);
-        message(minecraft, "message.createarchitect.freecam_started");
+        message(minecraft, "message.createarchitect.freecam_started",
+                EXIT_FREECAM.getTranslatedKeyMessage(), EDIT.getTranslatedKeyMessage());
     }
 
     public static void sync(SchematicTransformation transformation) {
@@ -131,10 +132,6 @@ public final class ArchitectHologramSession {
 
         if (minecraft.hitResult instanceof BlockHitResult hit
                 && minecraft.level.getBlockEntity(hit.getBlockPos()) instanceof SchematicannonBlockEntity cannon) {
-            if (cannon.state != SchematicannonBlockEntity.State.STOPPED) {
-                message(minecraft, "message.createarchitect.cannon_running");
-                return;
-            }
             if (!select(cannon)) {
                 message(minecraft, "message.createarchitect.no_schematic");
                 return;
@@ -146,12 +143,8 @@ public final class ArchitectHologramSession {
             return;
         }
         if (cannonPos == null
-                || !(minecraft.level.getBlockEntity(cannonPos) instanceof SchematicannonBlockEntity selectedCannon)) {
+                || !(minecraft.level.getBlockEntity(cannonPos) instanceof SchematicannonBlockEntity)) {
             message(minecraft, "message.createarchitect.no_schematic");
-            return;
-        }
-        if (selectedCannon.state != SchematicannonBlockEntity.State.STOPPED) {
-            message(minecraft, "message.createarchitect.cannon_running");
             return;
         }
         editing = true;
@@ -267,8 +260,8 @@ public final class ArchitectHologramSession {
                 && stack.has(AllDataComponents.SCHEMATIC_ANCHOR);
     }
 
-    private static void message(Minecraft minecraft, String key) {
-        minecraft.player.displayClientMessage(Component.translatable(key), true);
+    private static void message(Minecraft minecraft, String key, Object... arguments) {
+        minecraft.player.displayClientMessage(Component.translatable(key, arguments), true);
     }
 
     private static void clear() {
@@ -314,7 +307,8 @@ public final class ArchitectHologramSession {
             Minecraft minecraft = Minecraft.getInstance();
             if (camera == null || minecraft.screen != null)
                 return;
-            Component hint = Component.translatable("gui.createarchitect.exit_freecam_hint");
+            Component hint = Component.translatable("gui.createarchitect.freecam_hint",
+                    EXIT_FREECAM.getTranslatedKeyMessage(), EDIT.getTranslatedKeyMessage());
             int centerX = event.getGuiGraphics().guiWidth() / 2;
             int textWidth = minecraft.font.width(hint);
             event.getGuiGraphics().fill(centerX - textWidth / 2 - 5, 6,

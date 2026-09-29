@@ -4,11 +4,11 @@
   "key.createarchitect.edit_hologram": "Edit Schematicannon Hologram",
   "key.createarchitect.exit_freecam": "Exit Architect Freecam",
   "gui.createarchitect.open_freecam": "Open Architect Freecam",
-  "gui.createarchitect.exit_freecam_hint": "Architect Freecam — Press V to exit",
+  "gui.createarchitect.freecam_hint": "Architect Freecam — %1$s Exit • %2$s Edit",
   "message.createarchitect.editing_started": "Architect Mode: editing hologram",
   "message.createarchitect.editing_stopped": "Architect Mode: hologram locked",
-  "message.createarchitect.freecam_started": "Architect Freecam: WASD/Space/Shift, Ctrl to boost, V to exit",
+  "message.createarchitect.freecam_started": "Freecam: WASD/Space/Shift, Ctrl boost, %1$s exit, %2$s edit",
   "message.createarchitect.freecam_stopped": "Architect Freecam closed",
   "message.createarchitect.no_schematic": "This Schematicannon has no deployed schematic",
-  "message.createarchitect.cannon_running": "Stop the Schematicannon before editing its hologram"
+  "message.createarchitect.cannon_running": "Editing will stop the active Schematicannon"
 }

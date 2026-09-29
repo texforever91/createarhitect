@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "SchematicannonBlockEntityMixin",
+    "SchematicannonBlockEntityAccessor",
     "SchematicannonInventoryMixin",
     "client.MouseHandlerMixin",
     "client.SchematicannonScreenMixin",
