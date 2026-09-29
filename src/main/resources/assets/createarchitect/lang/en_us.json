@@ -1,3 +1,9 @@
 {
-  "mod.createarchitect.name": "Create: Architect"
+  "mod.createarchitect.name": "Create: Architect",
+  "key.categories.createarchitect": "Create: Architect",
+  "key.createarchitect.edit_hologram": "Edit Schematicannon Hologram",
+  "message.createarchitect.editing_started": "Architect Mode: editing hologram",
+  "message.createarchitect.editing_stopped": "Architect Mode: hologram locked",
+  "message.createarchitect.no_schematic": "This Schematicannon has no deployed schematic",
+  "message.createarchitect.cannon_running": "Stop the Schematicannon before editing its hologram"
 }

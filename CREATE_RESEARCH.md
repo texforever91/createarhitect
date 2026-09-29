@@ -107,16 +107,25 @@ consume a derived immutable preview state, not decide gameplay changes.
 
 ## Milestone 1 proof of concept
 
-The implemented path is deliberately narrow:
+The original standalone-renderer prototype failed its first in-world test. It
+was replaced in alpha.2 with a bridge into Create's complete `SchematicHandler`.
+The nearest loaded cannon supplies a virtual active schematic when no schematic
+is held; passive input is locked, while `G` aimed at a stopped cannon enables
+Create's native placement tools. Transform updates use an Architect serverbound
+packet validated against player distance, cannon state, schematic type, and the
+cannon's maximum anchor distance.
+
+The underlying sync path remains deliberately narrow:
 
 1. A mixin appends only slot 0's `ItemStack` to the Schematicannon's existing
    client update tag and restores it on the client.
 2. A second mixin calls `notifyUpdate()` when server slot 0 changes.
 3. The client scans already-loaded chunks periodically for Schematicannons with a
    deployed schematic.
-4. It uses `SchematicInstances.get()` and `SchematicRenderer` unchanged.
-5. Renderer instances are cached by cannon position plus schematic hash and are
-   capped to 12 chunks / 192 blocks, with distance and frustum culling.
+4. A `SchematicHandler` mixin supplies the selected cannon stack only when Create
+   finds no schematic in hand, preserving the original held-item workflow.
+5. Passive previews suppress editing input and overlays; Architect Mode redirects
+   Create's normal delayed transformation sync to the selected cannon.
 
 The server remains authoritative and no Create source is modified. The only
 invasive portion is the small sync bridge forced by Create's deliberate inventory
@@ -130,15 +139,15 @@ omission. The renderer and structure pipeline use public Create classes.
   schematic data service or a server-assigned preview asset ID.
 - The POC always enables associated previews; a user-facing `Preview: ON/OFF`
   control and persisted per-cannon flag remain to be added.
-- Rendering from a global AFTER_PARTICLES event works with Create's buffer type,
-  but visual opacity, ordering, Fabulous graphics, shaders, Sodium, and block
-  entity models need hands-on compatibility testing.
+- Native handler reuse should preserve Create's visual compatibility, but
+  Fabulous graphics, shaders, Sodium, and block entity models still need hands-on
+  compatibility testing.
 - Bounds/anchor correctness must be tested for all rotations and mirrors.
 - Large schematics need profiling. Current renderer tessellation is cached and
   draw calls are culled, but initial buffer construction can still stall the
   render thread. A production path should budget/asynchronously prepare sections
   and split very large previews spatially.
-- Scanning loaded chunks every 20 frames is acceptable for a POC, not the desired
+- Scanning loaded chunks every 20 ticks is acceptable for a POC, not the desired
   final index. Client chunk load/unload tracking or an explicit preview registry
   should replace it.
 - Completed cannons may move their schematic to the output slot; clarify whether

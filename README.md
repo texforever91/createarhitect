@@ -15,5 +15,10 @@ Phase 0 plus a Milestone 1 persistent-schematic-preview proof of concept.
 Build with `./gradlew build` and launch the development client with
 `./gradlew runClient`.
 
+With a deployed schematic in a stopped Schematicannon, its hologram remains
+visible through Create's native schematic handler. Look at the cannon and press
+`G` to enter or leave Architect Mode; while editing, Create's normal schematic
+tool-menu controls move, rotate, and mirror the cannon's stored schematic.
+
 See [CREATE_RESEARCH.md](CREATE_RESEARCH.md) for the upstream architecture audit,
 implementation rationale, verification status, and known limitations.
