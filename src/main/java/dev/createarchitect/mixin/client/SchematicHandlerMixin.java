@@ -86,9 +86,8 @@ abstract class SchematicHandlerMixin {
             at = @At(value = "INVOKE",
                     target = "Lcom/simibubi/create/content/schematics/client/tools/ISchematicTool;renderOnSchematic(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/createmod/catnip/render/SuperRenderTypeBuffer;)V"),
             remap = false)
-    private void createarchitect$hidePassiveSchematicTool(ISchematicTool tool, PoseStack poseStack,
-                                                           SuperRenderTypeBuffer buffer) {
-        if (activeHotbarSlot != -1)
-            tool.renderOnSchematic(poseStack, buffer);
+    private void createarchitect$keepSchematicOutline(ISchematicTool tool, PoseStack poseStack,
+                                                       SuperRenderTypeBuffer buffer) {
+        tool.renderOnSchematic(poseStack, buffer);
     }
 }
