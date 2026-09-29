@@ -50,9 +50,10 @@ The current alpha provides the first persistent-schematic workflow:
 
 ## Architect Mode controls
 
-First deploy a normal Create schematic, place it into a Schematicannon, and
-leave the cannon stopped. Press `G` to toggle its editing controls. Open the
-Schematicannon screen and use its freecam button to detach the camera.
+First deploy a normal Create schematic and place it into a Schematicannon. Open
+the Schematicannon screen and use its freecam button to detach the camera; this
+also works while the cannon is running. Stop the cannon before pressing `G` to
+toggle editing controls, since an active print cannot safely be repositioned.
 
 | Control | Action |
 | --- | --- |

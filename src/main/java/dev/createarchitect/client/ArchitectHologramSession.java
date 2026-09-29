@@ -79,10 +79,6 @@ public final class ArchitectHologramSession {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null)
             return;
-        if (cannon.state != SchematicannonBlockEntity.State.STOPPED) {
-            message(minecraft, "message.createarchitect.cannon_running");
-            return;
-        }
         if (!select(cannon)) {
             message(minecraft, "message.createarchitect.no_schematic");
             return;
@@ -145,6 +141,15 @@ public final class ArchitectHologramSession {
 
         if (schematic.isEmpty()) {
             message(minecraft, "message.createarchitect.no_schematic");
+            return;
+        }
+        if (cannonPos == null
+                || !(minecraft.level.getBlockEntity(cannonPos) instanceof SchematicannonBlockEntity selectedCannon)) {
+            message(minecraft, "message.createarchitect.no_schematic");
+            return;
+        }
+        if (selectedCannon.state != SchematicannonBlockEntity.State.STOPPED) {
+            message(minecraft, "message.createarchitect.cannon_running");
             return;
         }
         editing = true;
