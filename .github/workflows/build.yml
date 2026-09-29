@@ -2,6 +2,9 @@ name: Build
 
 on: [push, pull_request]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,3 +26,78 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+
+      - name: Write simple release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if previous_tag=$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null); then
+            range="${previous_tag}..${tag}"
+          else
+            range="${tag}"
+          fi
+
+          mapfile -t subjects < <(git log --format='%s' "${range}")
+          : > release-notes.md
+          feature_pattern='^feat(\([^)]*\))?!?:[[:space:]]*'
+          fix_pattern='^fix(\([^)]*\))?!?:[[:space:]]*'
+          feature_or_fix_pattern='^(feat|fix)(\([^)]*\))?!?:[[:space:]]*'
+
+          write_section() {
+            local heading="$1"
+            local kind="$2"
+            local wrote_heading=false
+            local subject
+
+            for subject in "${subjects[@]}"; do
+              case "$kind" in
+                feature) [[ "$subject" =~ $feature_pattern ]] || continue ;;
+                fix) [[ "$subject" =~ $fix_pattern ]] || continue ;;
+                change) [[ "$subject" =~ $feature_or_fix_pattern ]] && continue ;;
+              esac
+
+              if [[ "$wrote_heading" == false ]]; then
+                printf '## %s\n\n' "$heading" >> release-notes.md
+                wrote_heading=true
+              fi
+              subject=$(sed -E 's/^[^:]+:[[:space:]]*//' <<< "$subject")
+              printf -- '- %s\n' "$subject" >> release-notes.md
+            done
+
+            if [[ "$wrote_heading" == true ]]; then
+              printf '\n' >> release-notes.md
+            fi
+          }
+
+          write_section "New Features" feature
+          write_section "Bug Fixes" fix
+          write_section "Changes" change
+
+          if [[ ! -s release-notes.md ]]; then
+            printf 'No user-facing changes listed.\n' > release-notes.md
+          fi
+
+      - name: Publish tagged build
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t jars < <(find build/libs -maxdepth 1 -type f \
+            -name 'createarchitect-*.jar' ! -name '*-sources.jar' | sort)
+          if [[ "${#jars[@]}" -ne 1 ]]; then
+            printf 'Expected exactly one release JAR, found %s\n' "${#jars[@]}" >&2
+            exit 1
+          fi
+
+          prerelease=()
+          lowercase_tag="${GITHUB_REF_NAME,,}"
+          if [[ "$lowercase_tag" =~ (alpha|beta|rc|pre) ]]; then
+            prerelease=(--prerelease)
+          fi
+
+          gh release create "$GITHUB_REF_NAME" "${jars[0]}" \
+            --title "Create: Architect ${GITHUB_REF_NAME}" \
+            --notes-file release-notes.md \
+            "${prerelease[@]}"
