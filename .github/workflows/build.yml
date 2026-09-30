@@ -112,10 +112,17 @@ jobs:
             prerelease=(--prerelease)
           fi
 
-          gh release create "$GITHUB_REF_NAME" "${jars[0]}" \
-            --title "Create: Architect ${GITHUB_REF_NAME}" \
-            --notes-file release-notes.md \
-            "${prerelease[@]}"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${jars[0]}" --clobber
+            gh release edit "$GITHUB_REF_NAME" \
+              --title "Create: Architect ${GITHUB_REF_NAME}" \
+              --notes-file release-notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" "${jars[0]}" \
+              --title "Create: Architect ${GITHUB_REF_NAME}" \
+              --notes-file release-notes.md \
+              "${prerelease[@]}"
+          fi
 
       - name: Publish to Modrinth
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
@@ -160,7 +167,7 @@ jobs:
               loaders: ["neoforge"],
               featured: false,
               status: "listed",
-              project_id: "createarchitect",
+              project_id: "if3weapJ",
               file_parts: ["file"],
               primary_file: "file"
             }' > modrinth-version.json
