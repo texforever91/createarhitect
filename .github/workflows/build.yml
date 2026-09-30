@@ -230,7 +230,7 @@ jobs:
 
           http_code=$(curl --silent --show-error --request POST \
             --header "X-Api-Token: $CURSEFORGE_TOKEN" \
-            --form 'metadata=@curseforge-metadata.json;type=application/json' \
+            --form 'metadata=<curseforge-metadata.json;type=application/json' \
             --form "file=@${jars[0]}" \
             --output curseforge-response.json \
             --write-out '%{http_code}' \
