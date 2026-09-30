@@ -18,9 +18,38 @@ public final class CreateArchitect {
     }
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
-        event.registrar("1").playToServer(
+        var registrar = event.registrar("1");
+        registrar.playToServer(
                 dev.createarchitect.network.UpdateCannonSchematicPayload.TYPE,
                 dev.createarchitect.network.UpdateCannonSchematicPayload.STREAM_CODEC,
                 dev.createarchitect.network.UpdateCannonSchematicPayload::handle);
+        registrar.playToServer(
+                dev.createarchitect.network.SetCannonPreviewPayload.TYPE,
+                dev.createarchitect.network.SetCannonPreviewPayload.STREAM_CODEC,
+                dev.createarchitect.network.SetCannonPreviewPayload::handle);
+        registrar.playToServer(
+                dev.createarchitect.network.RequestSharedPreviewManifestPayload.TYPE,
+                dev.createarchitect.network.RequestSharedPreviewManifestPayload.STREAM_CODEC,
+                dev.createarchitect.network.RequestSharedPreviewManifestPayload::handle);
+        registrar.playToServer(
+                dev.createarchitect.network.DownloadSharedPreviewPayload.TYPE,
+                dev.createarchitect.network.DownloadSharedPreviewPayload.STREAM_CODEC,
+                dev.createarchitect.network.DownloadSharedPreviewPayload::handle);
+        registrar.playToClient(
+                dev.createarchitect.network.SharedPreviewManifestPayload.TYPE,
+                dev.createarchitect.network.SharedPreviewManifestPayload.STREAM_CODEC,
+                dev.createarchitect.network.SharedPreviewManifestPayload::handle);
+        registrar.playToClient(
+                dev.createarchitect.network.SharedPreviewStartPayload.TYPE,
+                dev.createarchitect.network.SharedPreviewStartPayload.STREAM_CODEC,
+                dev.createarchitect.network.SharedPreviewStartPayload::handle);
+        registrar.playToClient(
+                dev.createarchitect.network.SharedPreviewChunkPayload.TYPE,
+                dev.createarchitect.network.SharedPreviewChunkPayload.STREAM_CODEC,
+                dev.createarchitect.network.SharedPreviewChunkPayload::handle);
+        registrar.playToClient(
+                dev.createarchitect.network.SharedPreviewErrorPayload.TYPE,
+                dev.createarchitect.network.SharedPreviewErrorPayload.STREAM_CODEC,
+                dev.createarchitect.network.SharedPreviewErrorPayload::handle);
     }
 }

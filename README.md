@@ -11,9 +11,9 @@ Create: Architect explores what that system could become if schematics remained
 visible, could be edited from the cannon, understood the surrounding terrain,
 and could eventually be organised into coordinated multi-schematic projects.
 
-> **Early alpha:** This project is an experimental proof of concept. Features,
-> controls, saved data, and compatibility may change. Back up important worlds
-> before testing it.
+> **First stable release:** Create: Architect 1.0.0 establishes the persistent
+> schematic, Architect Mode, freecam, and multiplayer preview-sharing workflow.
+> Back up important worlds when installing any new mod or major update.
 
 ## Project origin and AI disclosure
 
@@ -27,17 +27,25 @@ Tex's direction, feedback, and testing. The project should therefore be
 understood as an AI-assisted community experiment built to explore an idea—not
 as code personally written by Tex.
 
-Bug reports and contributions are welcome, but users should review the code and
-use alpha builds with the same caution they would apply to any experimental mod.
+Bug reports and contributions are welcome. Users are encouraged to review the
+open-source code and report unexpected behaviour.
 
 ## Current functionality
 
-The current alpha provides the first persistent-schematic workflow:
+The current release provides the first persistent-schematic workflow:
 
 - A deployed schematic placed inside a stopped Schematicannon remains visible
   even when the player is no longer holding the schematic item.
 - The preview reuses Create's native schematic renderer and visual style.
 - Create's schematic boundary remains visible around the planned structure.
+- Each Schematicannon has a Show/Hide Hologram button, and that choice persists
+  when the world is reloaded.
+- Each cannon keeps an independent schematic preview, placement box, and
+  visibility setting—even when several cannons use different blueprints.
+- Multiplayer clients can acquire a missing schematic preview from a nearby
+  Schematicannon after reviewing its owner, filename, and compressed size.
+- Acquired previews are validated, cached locally, and reused without changing
+  the schematic item stored by the server.
 - Pressing `G` enters Architect Mode for the selected Schematicannon.
 - Create's normal schematic toolbar can move, rotate, and mirror the schematic
   stored inside the cannon.
@@ -80,7 +88,6 @@ preview foundation can be tested before larger systems are added.
 
 ### 1. Stable persistent previews
 
-- Preview on/off controls
 - Better selection when several Schematicannons are nearby
 - Improved culling and performance for very large schematics
 - More polished Architect Mode controls and camera behaviour
@@ -168,8 +175,7 @@ multi-version support are outside the present scope.
 3. Place the Create: Architect `.jar` in the instance's `mods` directory.
 4. Start Minecraft and confirm that Create: Architect appears in the mod list.
 
-Do not assume that an alpha build is safe for irreplaceable worlds. Keep a world
-backup and test with a copy first.
+Keep a world backup and test major mod updates with a copy first.
 
 ## Building from source
 

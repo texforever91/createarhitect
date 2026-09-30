@@ -11,6 +11,7 @@
     "client.SchematicannonScreenMixin",
     "client.SchematicHandlerMixin",
     "client.SchematicToolBaseMixin",
+    "client.accessor.AbstractSimiWidgetAccessor",
     "client.accessor.AbstractContainerScreenAccessor",
     "client.accessor.ScreenInvoker"
   ],

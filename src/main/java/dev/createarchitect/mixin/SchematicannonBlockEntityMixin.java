@@ -1,21 +1,38 @@
 package dev.createarchitect.mixin;
 
 import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
+import dev.createarchitect.SchematicannonPreviewState;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SchematicannonBlockEntity.class)
-abstract class SchematicannonBlockEntityMixin {
+abstract class SchematicannonBlockEntityMixin implements SchematicannonPreviewState {
     private static final String PREVIEW_SCHEMATIC_KEY = "CreateArchitectPreviewSchematic";
+    private static final String PREVIEW_ENABLED_KEY = "CreateArchitectPreviewEnabled";
+
+    @Unique
+    private boolean createarchitect$previewEnabled = true;
+
+    @Override
+    public boolean createarchitect$isPreviewEnabled() {
+        return createarchitect$previewEnabled;
+    }
+
+    @Override
+    public void createarchitect$setPreviewEnabled(boolean enabled) {
+        createarchitect$previewEnabled = enabled;
+    }
 
     @Inject(method = "write", at = @At("TAIL"), remap = false)
     private void createarchitect$writePreviewSchematic(CompoundTag tag, HolderLookup.Provider registries,
                                                        boolean clientPacket, CallbackInfo ci) {
+        tag.putBoolean(PREVIEW_ENABLED_KEY, createarchitect$previewEnabled);
         if (!clientPacket)
             return;
         SchematicannonBlockEntity cannon = (SchematicannonBlockEntity) (Object) this;
@@ -27,6 +44,8 @@ abstract class SchematicannonBlockEntityMixin {
     @Inject(method = "read", at = @At("TAIL"), remap = false)
     private void createarchitect$readPreviewSchematic(CompoundTag tag, HolderLookup.Provider registries,
                                                       boolean clientPacket, CallbackInfo ci) {
+        createarchitect$previewEnabled = !tag.contains(PREVIEW_ENABLED_KEY)
+                || tag.getBoolean(PREVIEW_ENABLED_KEY);
         if (!clientPacket)
             return;
         SchematicannonBlockEntity cannon = (SchematicannonBlockEntity) (Object) this;

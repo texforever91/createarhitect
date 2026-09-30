@@ -4,9 +4,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.schematics.cannon.SchematicannonBlockEntity;
+import com.simibubi.create.content.schematics.client.SchematicHandler;
 import com.simibubi.create.content.schematics.client.SchematicTransformation;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.createarchitect.CreateArchitect;
+import dev.createarchitect.SchematicannonPreviewState;
 import dev.createarchitect.network.UpdateCannonSchematicPayload;
+import net.createmod.catnip.render.SuperRenderTypeBuffer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.CameraType;
@@ -33,6 +37,9 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class ArchitectHologramSession {
     private static final KeyMapping EDIT = new KeyMapping(
             "key.createarchitect.edit_hologram", InputConstants.Type.KEYSYM,
@@ -50,6 +57,10 @@ public final class ArchitectHologramSession {
     private static Marker camera;
     private static CameraType previousCameraType;
     private static int scanCooldown;
+    private static final Map<BlockPos, SupplementalPreview> previews = new HashMap<>();
+    private static ItemStack supplementalStack = ItemStack.EMPTY;
+    private static boolean processingSupplemental;
+    private static boolean renderingSupplemental;
 
     private ArchitectHologramSession() {}
 
@@ -63,6 +74,28 @@ public final class ArchitectHologramSession {
 
     public static boolean isEditing() {
         return editing;
+    }
+
+    public static Component freecamTooltipControls() {
+        return Component.translatable("gui.createarchitect.freecam_controls",
+                EXIT_FREECAM.getTranslatedKeyMessage(), EDIT.getTranslatedKeyMessage());
+    }
+
+    public static void refreshPreviews() {
+        previews.clear();
+        scanCooldown = 0;
+    }
+
+    public static ItemStack supplementalStack() {
+        return supplementalStack.isEmpty() ? null : supplementalStack;
+    }
+
+    public static boolean isProcessingSupplemental() {
+        return processingSupplemental;
+    }
+
+    public static boolean isRenderingSupplemental() {
+        return renderingSupplemental;
     }
 
     public static Entity camera() {
@@ -89,6 +122,33 @@ public final class ArchitectHologramSession {
         startCamera(minecraft);
         message(minecraft, "message.createarchitect.freecam_started",
                 EXIT_FREECAM.getTranslatedKeyMessage(), EDIT.getTranslatedKeyMessage());
+    }
+
+    public static void previewVisibilityChanged(SchematicannonBlockEntity cannon, boolean enabled) {
+        if (enabled) {
+            select(cannon);
+            scanCooldown = 0;
+            return;
+        }
+        previews.remove(cannon.getBlockPos());
+        if (cannonPos != null && cannonPos.equals(cannon.getBlockPos()))
+            clear();
+        scanCooldown = 0;
+    }
+
+    public static void renderSupplemental(PoseStack poseStack, SuperRenderTypeBuffer buffer, Vec3 cameraPosition) {
+        if (renderingSupplemental || previews.isEmpty())
+            return;
+        renderingSupplemental = true;
+        try {
+            for (Map.Entry<BlockPos, SupplementalPreview> entry : previews.entrySet()) {
+                if (editing && entry.getKey().equals(cannonPos))
+                    continue;
+                entry.getValue().handler.render(poseStack, buffer, cameraPosition);
+            }
+        } finally {
+            renderingSupplemental = false;
+        }
     }
 
     public static void sync(SchematicTransformation transformation) {
@@ -118,9 +178,10 @@ public final class ArchitectHologramSession {
             tickCamera(minecraft);
 
         if (!editing && camera == null && --scanCooldown <= 0) {
-            discoverNearest(minecraft.level, minecraft.player.blockPosition());
+            discoverPreviews(minecraft.level, minecraft.player.blockPosition());
             scanCooldown = 20;
         }
+        tickSupplementalPreviews();
     }
 
     private static void toggleEditing(Minecraft minecraft) {
@@ -210,9 +271,10 @@ public final class ArchitectHologramSession {
         previousCameraType = null;
     }
 
-    private static void discoverNearest(ClientLevel level, BlockPos playerPos) {
+    private static void discoverPreviews(ClientLevel level, BlockPos playerPos) {
         SchematicannonBlockEntity nearest = null;
         double nearestDistance = MAX_DISCOVERY_DISTANCE_SQR;
+        Map<BlockPos, ItemStack> discovered = new HashMap<>();
         int radius = Math.min(Minecraft.getInstance().options.getEffectiveRenderDistance(), 12);
         int centerX = playerPos.getX() >> 4;
         int centerZ = playerPos.getZ() >> 4;
@@ -225,10 +287,16 @@ public final class ArchitectHologramSession {
                 for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                     if (!(blockEntity instanceof SchematicannonBlockEntity candidate))
                         continue;
+                    if (!((SchematicannonPreviewState) candidate).createarchitect$isPreviewEnabled())
+                        continue;
                     ItemStack candidateStack = candidate.inventory.getStackInSlot(0);
                     if (!previewable(candidateStack))
                         continue;
                     double distance = candidate.getBlockPos().distSqr(playerPos);
+                    if (distance > MAX_DISCOVERY_DISTANCE_SQR)
+                        continue;
+                    discovered.put(candidate.getBlockPos().immutable(),
+                            SharedPreviewClient.resolvePreviewStack(candidateStack));
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
                         nearest = candidate;
@@ -236,6 +304,13 @@ public final class ArchitectHologramSession {
                 }
             }
         }
+
+        previews.keySet().removeIf(position -> !discovered.containsKey(position));
+        discovered.forEach((position, stack) -> previews.compute(position, (ignored, existing) -> {
+            if (existing != null && ItemStack.isSameItemSameComponents(existing.stack, stack))
+                return existing;
+            return new SupplementalPreview(stack.copy(), new SchematicHandler());
+        }));
 
         if (nearest == null) {
             if (!editing)
@@ -245,12 +320,29 @@ public final class ArchitectHologramSession {
         }
     }
 
+    private static void tickSupplementalPreviews() {
+        if (previews.isEmpty())
+            return;
+        processingSupplemental = true;
+        try {
+            for (SupplementalPreview preview : previews.values()) {
+                supplementalStack = preview.stack;
+                preview.handler.tick();
+            }
+        } finally {
+            supplementalStack = ItemStack.EMPTY;
+            processingSupplemental = false;
+        }
+    }
+
     private static boolean select(SchematicannonBlockEntity cannon) {
+        if (!((SchematicannonPreviewState) cannon).createarchitect$isPreviewEnabled())
+            return false;
         ItemStack stack = cannon.inventory.getStackInSlot(0);
         if (!previewable(stack))
             return false;
         cannonPos = cannon.getBlockPos().immutable();
-        schematic = stack.copy();
+        schematic = SharedPreviewClient.resolvePreviewStack(stack);
         return true;
     }
 
@@ -270,6 +362,8 @@ public final class ArchitectHologramSession {
         schematic = ItemStack.EMPTY;
         editing = false;
     }
+
+    private record SupplementalPreview(ItemStack stack, SchematicHandler handler) {}
 
     @EventBusSubscriber(modid = CreateArchitect.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static final class ModEvents {
@@ -319,6 +413,7 @@ public final class ArchitectHologramSession {
         @SubscribeEvent
         public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
             clear();
+            previews.clear();
         }
     }
 }
